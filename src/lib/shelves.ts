@@ -46,3 +46,13 @@ export function getShelfValue(book: Book, shelves: Record<string, ShelfStatus>):
   return shelves[key] ?? 'want_to_read'
 }
 
+export function removeShelfValue(
+  book: Book,
+  shelves: Record<string, ShelfStatus>,
+): Record<string, ShelfStatus> {
+  const key = getBookIdentifier(book)
+  const next = { ...shelves }
+  delete next[key]
+  return next
+}
+

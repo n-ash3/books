@@ -4,7 +4,9 @@ export type ShelfStatus =
   | 'read'
   | 'did_not_finish'
 
-export type BookSource = 'hardcover' | 'openlibrary' | 'fallback'
+export type ShelfValue = ShelfStatus | 'none'
+
+export type BookSource = 'hardcover' | 'googlebooks' | 'openlibrary' | 'fallback'
 
 export interface Book {
   id: string
@@ -14,7 +16,10 @@ export interface Book {
   description: string
   releaseDate: string
   rating: number | null
+  ratingCount?: number | null
+  reviewPreview?: string
   pages?: number | null
+  publisher?: string
   coverUrl?: string
   genres: string[]
   isbn13?: string
@@ -26,7 +31,7 @@ export interface Book {
 
 export interface SearchResult {
   books: Book[]
-  source: 'hardcover' | 'openlibrary' | 'mixed' | 'fallback'
+  source: 'hardcover' | 'googlebooks' | 'openlibrary' | 'mixed' | 'fallback'
   error?: string
 }
 

@@ -11,14 +11,15 @@ It supports:
 
 - **Find**: search books by title, author, ISBN, or series
 - **Track**: save books into shelves (Want to Read, Currently Reading, Read, Did Not Finish)
-- **Connect**: community-oriented section for social discovery patterns
-- **Discover**: browse books with ratings and quick-buy links
+- **Discover**: compact, scannable cards in a responsive grid
 - **Book detail pages**: click any card to open a dedicated page inspired by the Hardcover book view
+- **Shelf sync ready**: optional Django endpoint integration for persistent backend updates
 
 The app now uses multiple providers for broader coverage:
 
-- Hardcover GraphQL (when token is configured)
-- Open Library search (large public catalog)
+- Hardcover GraphQL (primary when token is configured)
+- Google Books (fallback for missing fields and broader coverage)
+- Open Library (final fallback + enrichment)
 - Curated fallback books (if providers fail)
 
 This means many more books are searchable even without a Hardcover token.
@@ -53,7 +54,13 @@ VITE_HARDCOVER_API_TOKEN=your_token_here
 VITE_HARDCOVER_GRAPHQL_URL=https://api.hardcover.app/v1/graphql
 ```
 
-If `VITE_HARDCOVER_API_TOKEN` is not set, the app still works by using Open Library and fallback data.
+```bash
+VITE_DJANGO_SHELF_SYNC_URL=http://localhost:8000/api/shelves/sync/
+```
+
+If `VITE_HARDCOVER_API_TOKEN` is not set, the app still works via Google Books + Open Library + fallback data.
+
+If `VITE_DJANGO_SHELF_SYNC_URL` is set, shelf changes are posted to your Django backend (with credentials included). If unset, shelf state remains local-only in browser storage.
 
 ## Deploy to GitHub Pages
 

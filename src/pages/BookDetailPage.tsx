@@ -1,15 +1,22 @@
 import { Link, useParams } from 'react-router-dom'
-import type { Book, ShelfStatus } from '../lib/types'
+import type { Book, ShelfStatus, ShelfValue } from '../lib/types'
 import { buildRetailerLinks } from '../lib/retailerLinks'
-import { formatShelfLabel, getBookIdentifier, SHELF_OPTIONS } from '../lib/shelves'
+import { formatShelfLabel, getBookIdentifier } from '../lib/shelves'
+import { ShelfSelector } from '../components/ShelfSelector'
 
 interface BookDetailPageProps {
   booksById: Record<string, Book>
   shelves: Record<string, ShelfStatus>
   onShelfChange: (book: Book, status: ShelfStatus) => void
+  onShelfRemove: (book: Book) => Promise<void> | void
 }
 
-export function BookDetailPage({ booksById, shelves, onShelfChange }: BookDetailPageProps) {
+export function BookDetailPage({
+  booksById,
+  shelves,
+  onShelfChange,
+  onShelfRemove,
+}: BookDetailPageProps) {
   const params = useParams<{ id: string }>()
   const decodedId = params.id ? decodeURIComponent(params.id) : ''
   const book = booksById[decodedId]
@@ -33,6 +40,7 @@ export function BookDetailPage({ booksById, shelves, onShelfChange }: BookDetail
 
   const retailerLinks = buildRetailerLinks(book)
   const shelf = shelves[getBookIdentifier(book)] ?? 'want_to_read'
+  const detailShelfValue: ShelfValue = shelf
 
   return (
     <div className="detail-root">
@@ -75,19 +83,19 @@ export function BookDetailPage({ booksById, shelves, onShelfChange }: BookDetail
                 </div>
               </div>
 
-              <label className="shelf-select detail-shelf">
-                Shelf
-                <select
-                  value={shelf}
-                  onChange={(event) => onShelfChange(book, event.target.value as ShelfStatus)}
-                >
-                  {SHELF_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <ShelfSelector
+                className="shelf-select detail-shelf"
+                label="Shelf"
+                value={detailShelfValue}
+                allowRemove
+                onChange={(status) => {
+                  if (status === 'none') {
+                    void onShelfRemove(book)
+                    return
+                  }
+                  onShelfChange(book, status)
+                }}
+              />
               <p className="shelf-preview">Current shelf: {formatShelfLabel(shelf)}</p>
 
               <div className="retailer-links detail-links">
@@ -132,11 +140,20 @@ export function BookDetailPage({ booksById, shelves, onShelfChange }: BookDetail
               </div>
             </div>
             <div>
-              <h3>Identifiers</h3>
+              <h3>Metadata</h3>
+              <p>Publisher: {book.publisher ?? 'Unknown'}</p>
+              <p>Ratings: {book.ratingCount ? book.ratingCount.toLocaleString() : 'Unknown'}</p>
               <p>ISBN-13: {book.isbn13 ?? 'Unknown'}</p>
               <p>ISBN-10: {book.isbn10 ?? 'Unknown'}</p>
             </div>
           </section>
+
+          {book.reviewPreview ? (
+            <section className="detail-review-preview">
+              <h3>Review preview</h3>
+              <p>{book.reviewPreview}</p>
+            </section>
+          ) : null}
         </section>
       </div>
     </div>
