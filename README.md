@@ -1,4 +1,4 @@
-# Book Smart (Hardcover/Goodreads-style MVP)
+# Book Smart (Hardcover/Goodreads-style app)
 
 Book Smart is a reader platform inspired by Hardcover and Goodreads, with built-in links to buy books from:
 
@@ -13,8 +13,15 @@ It supports:
 - **Track**: save books into shelves (Want to Read, Currently Reading, Read, Did Not Finish)
 - **Connect**: community-oriented section for social discovery patterns
 - **Discover**: browse books with ratings and quick-buy links
+- **Book detail pages**: click any card to open a dedicated page inspired by the Hardcover book view
 
-The app can use the Hardcover GraphQL API when a token is configured, and falls back to curated local data if no token is present.
+The app now uses multiple providers for broader coverage:
+
+- Hardcover GraphQL (when token is configured)
+- Open Library search (large public catalog)
+- Curated fallback books (if providers fail)
+
+This means many more books are searchable even without a Hardcover token.
 
 ## Hardcover API references
 
@@ -46,7 +53,7 @@ VITE_HARDCOVER_API_TOKEN=your_token_here
 VITE_HARDCOVER_GRAPHQL_URL=https://api.hardcover.app/v1/graphql
 ```
 
-If `VITE_HARDCOVER_API_TOKEN` is not set, the UI still works using local fallback data.
+If `VITE_HARDCOVER_API_TOKEN` is not set, the app still works by using Open Library and fallback data.
 
 ## Deploy to GitHub Pages
 

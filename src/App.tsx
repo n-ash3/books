@@ -1,61 +1,40 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { searchBooks } from './lib/hardcoverApi'
-import type { Book, ShelfStatus } from './lib/types'
+import { Link, Route, Routes } from 'react-router-dom'
+import { searchBooks } from './lib/bookSearch'
+import type { Book, SearchResult, ShelfStatus } from './lib/types'
 import { FALLBACK_BOOKS } from './data/fallbackBooks'
 import { buildRetailerLinks } from './lib/retailerLinks'
-
-const STORAGE_KEY = 'book-smart.shelves.v1'
-
-const SHELF_OPTIONS: Array<{ value: ShelfStatus; label: string }> = [
-  { value: 'want_to_read', label: 'Want to Read' },
-  { value: 'currently_reading', label: 'Currently Reading' },
-  { value: 'read', label: 'Read' },
-  { value: 'did_not_finish', label: 'Did Not Finish' },
-]
-
-function formatShelfLabel(value: ShelfStatus): string {
-  return SHELF_OPTIONS.find((option) => option.value === value)?.label ?? value
-}
-
-function loadShelves(): Record<string, ShelfStatus> {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    if (!raw) {
-      return {}
-    }
-
-    const parsed = JSON.parse(raw) as Record<string, ShelfStatus>
-    return parsed ?? {}
-  } catch {
-    return {}
-  }
-}
-
-function persistShelves(data: Record<string, ShelfStatus>): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
-}
-
-function getBookIdentifier(book: Book): string {
-  if (book.isbn13) {
-    return book.isbn13
-  }
-  if (book.isbn10) {
-    return book.isbn10
-  }
-  return `slug:${book.slug}`
-}
+import {
+  formatShelfLabel,
+  getBookIdentifier,
+  getShelfValue,
+  loadShelves,
+  persistShelves,
+  SHELF_OPTIONS,
+} from './lib/shelves'
+import { loadBookCache, updateBookCacheWithResults } from './lib/bookStore'
+import { BookDetailPage } from './pages/BookDetailPage'
 
 function App() {
+  const initialCache = useMemo(() => loadBookCache(), [])
   const [query, setQuery] = useState('the hobbit')
-  const [books, setBooks] = useState<Book[]>(FALLBACK_BOOKS)
+  const [books, setBooks] = useState<Book[]>(initialCache)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [source, setSource] = useState<'hardcover' | 'fallback'>('fallback')
+  const [source, setSource] = useState<SearchResult['source']>('fallback')
   const [shelves, setShelves] = useState<Record<string, ShelfStatus>>({})
+  const [bookCache, setBookCache] = useState<Book[]>(initialCache)
 
   useEffect(() => {
     setShelves(loadShelves())
   }, [])
+
+  const booksById = useMemo(() => {
+    return bookCache.reduce<Record<string, Book>>((acc, book) => {
+      acc[book.id] = book
+      return acc
+    }, {})
+  }, [bookCache])
 
   const shelfStats = useMemo(() => {
     const counts = {
@@ -89,6 +68,7 @@ function App() {
     try {
       const result = await searchBooks(trimmed)
       setBooks(result.books)
+      setBookCache((previous) => updateBookCacheWithResults(previous, result.books))
       setSource(result.source)
       setError(result.error ?? '')
     } catch {
@@ -112,12 +92,13 @@ function App() {
     persistShelves(next)
   }
 
-  function getShelfValue(book: Book): ShelfStatus {
-    const key = getBookIdentifier(book)
-    return shelves[key] ?? 'want_to_read'
-  }
+  useEffect(() => {
+    if (books.length > 0) {
+      setBookCache((previous) => updateBookCacheWithResults(previous, books))
+    }
+  }, [books])
 
-  return (
+  const homePage = (
     <div className="app-shell">
       <header className="hero">
         <p className="eyebrow">Book Smart</p>
@@ -183,7 +164,15 @@ function App() {
         </form>
         <p className="source-note">
           Data source:{' '}
-          <strong>{source === 'hardcover' ? 'Hardcover API' : 'Fallback seed data'}</strong>
+          <strong>
+            {source === 'hardcover'
+              ? 'Hardcover API'
+              : source === 'openlibrary'
+                ? 'Open Library'
+                : source === 'mixed'
+                  ? 'Hardcover + Open Library'
+                  : 'Fallback seed data'}
+          </strong>
         </p>
         {error ? <p className="inline-alert">{error}</p> : null}
       </section>
@@ -222,18 +211,35 @@ function App() {
         <div className="book-grid">
           {books.map((book) => {
             const retailerLinks = buildRetailerLinks(book)
-            const shelfValue = getShelfValue(book)
+            const shelfValue = getShelfValue(book, shelves)
 
             return (
-              <article className="book-card" key={`${book.slug}-${book.title}`}>
+              <article className="book-card" key={book.id}>
+                <Link className="book-link" to={`/book/${encodeURIComponent(book.id)}`}>
+                  {book.coverUrl ? (
+                    <img src={book.coverUrl} alt={`${book.title} cover`} className="book-cover" />
+                  ) : (
+                    <div className="book-cover book-cover--placeholder" aria-hidden="true">
+                      No cover
+                    </div>
+                  )}
+                </Link>
                 <div className="book-meta">
-                  <h3>{book.title}</h3>
+                  <h3>
+                    <Link className="book-link" to={`/book/${encodeURIComponent(book.id)}`}>
+                      {book.title}
+                    </Link>
+                  </h3>
                   <p className="author">{book.author}</p>
                   <p className="description">{book.description}</p>
                 </div>
                 <div className="book-row">
                   <span>{book.releaseDate ? `Published ${book.releaseDate}` : 'Date unknown'}</span>
                   <span>{book.rating ? `${book.rating.toFixed(1)}★` : 'No rating yet'}</span>
+                </div>
+                <div className="book-row">
+                  <span>{book.pages ? `${book.pages} pages` : 'Page count unknown'}</span>
+                  <span>{book.genres?.length ? book.genres.slice(0, 2).join(', ') : 'No genres yet'}</span>
                 </div>
                 <label className="shelf-select">
                   Shelf
@@ -256,6 +262,9 @@ function App() {
                     </a>
                   ))}
                 </div>
+                <Link className="details-cta" to={`/book/${encodeURIComponent(book.id)}`}>
+                  Open details
+                </Link>
               </article>
             )
           })}
@@ -284,6 +293,22 @@ function App() {
         </p>
       </footer>
     </div>
+  )
+
+  return (
+    <Routes>
+      <Route path="/" element={homePage} />
+      <Route
+        path="/book/:id"
+        element={
+          <BookDetailPage
+            booksById={booksById}
+            shelves={shelves}
+            onShelfChange={updateShelf}
+          />
+        }
+      />
+    </Routes>
   )
 }
 

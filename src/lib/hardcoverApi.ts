@@ -1,5 +1,4 @@
-import { FALLBACK_BOOKS } from '../data/fallbackBooks'
-import type { Book, SearchResult } from './types'
+import type { Book } from './types'
 
 const HARDCOVER_ENDPOINT =
   import.meta.env.VITE_HARDCOVER_GRAPHQL_URL ?? 'https://api.hardcover.app/v1/graphql'
@@ -40,10 +39,14 @@ function pickNumber(...values: unknown[]): number | null {
   return null
 }
 
+function slugify(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+}
+
 function toBook(rawInput: Record<string, unknown>): Book | null {
   const raw = safeRecord(rawInput.book) ?? rawInput
   const title = pickString(raw.title, raw.name)
-  const slug = pickString(raw.slug) || title.toLowerCase().replaceAll(' ', '-')
+  const slug = pickString(raw.slug) || slugify(title)
   const description = pickString(raw.description, raw.summary) || 'No description available.'
 
   const releaseRaw = pickString(raw.release_date, raw.published_at, raw.publication_date)
@@ -54,25 +57,44 @@ function toBook(rawInput: Record<string, unknown>): Book | null {
   const firstEdition = safeRecord(editions[0])
   const isbn13 = pickString(firstEdition?.isbn_13, firstEdition?.isbn13) || undefined
   const isbn10 = pickString(firstEdition?.isbn_10, firstEdition?.isbn10) || undefined
+  const coverUrl =
+    pickString(firstEdition?.image, firstEdition?.cover_url, raw.image_url) || undefined
+  const canonicalUrl = pickString(raw.url, raw.canonical_url) || `https://hardcover.app/books/${slug}`
 
   const contributions = Array.isArray(raw.contributions) ? raw.contributions : []
   const firstContribution = safeRecord(contributions[0])
   const authorObject = safeRecord(firstContribution?.author)
   const author = pickString(raw.author, authorObject?.name) || 'Unknown author'
+  const genres =
+    Array.isArray(raw.genres) && raw.genres.length
+      ? raw.genres
+          .map((genre) => safeRecord(genre))
+          .map((genre) => pickString(genre?.name))
+          .filter(Boolean)
+          .slice(0, 6)
+      : []
+  const pageCount = pickNumber(raw.pages, firstEdition?.pages)
+  const id = pickString(raw.id, raw.book_id) || `hardcover:${slug}:${isbn13 ?? 'no-isbn'}`
 
   if (!title) {
     return null
   }
 
   return {
+    id,
+    source: 'hardcover',
     title,
     slug,
     description,
     releaseDate,
     rating,
     author,
+    pages: pageCount,
+    coverUrl,
+    genres,
     isbn13,
     isbn10,
+    canonicalUrl,
   }
 }
 
@@ -91,22 +113,18 @@ function parseSearchResults(payload: RawSearchPayload): Book[] {
   }
 }
 
-function fallbackResult(error?: string): SearchResult {
-  return {
-    books: FALLBACK_BOOKS,
-    source: 'fallback',
-    error,
-  }
+export function hasHardcoverToken(): boolean {
+  return Boolean(HARDCOVER_TOKEN)
 }
 
-export async function searchBooks(query: string): Promise<SearchResult> {
+export async function searchHardcoverBooks(query: string): Promise<Book[]> {
   const trimmed = query.trim()
   if (!trimmed) {
-    return fallbackResult()
+    return []
   }
 
   if (!HARDCOVER_TOKEN) {
-    return fallbackResult('No Hardcover API token set. Using local fallback data.')
+    return []
   }
 
   const operation = `
@@ -131,21 +149,13 @@ export async function searchBooks(query: string): Promise<SearchResult> {
     })
 
     if (!response.ok) {
-      return fallbackResult(`Hardcover request failed (${response.status}). Showing fallback data.`)
+      throw new Error(`Hardcover request failed (${response.status})`)
     }
 
     const payload = (await response.json()) as RawSearchPayload
     const books = parseSearchResults(payload)
-
-    if (books.length === 0) {
-      return fallbackResult('No Hardcover matches found. Showing fallback picks.')
-    }
-
-    return {
-      books,
-      source: 'hardcover',
-    }
+    return books
   } catch {
-    return fallbackResult('Hardcover API unreachable. Showing fallback picks.')
+    throw new Error('Hardcover API unreachable.')
   }
 }
