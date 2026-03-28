@@ -110,3 +110,26 @@ export async function fetchBooksByGenre(genre: string, limit = 24): Promise<Book
     return []
   }
 }
+
+export async function fetchBooksByGenres(genres: string[], limitPerGenre = 16): Promise<Book[]> {
+  const uniqueGenres = Array.from(new Set(genres.map((genre) => genre.trim()).filter(Boolean)))
+  if (uniqueGenres.length === 0) {
+    return []
+  }
+
+  const all = await Promise.all(uniqueGenres.map((genre) => fetchBooksByGenre(genre, limitPerGenre)))
+  const merged = all.flat()
+  const seen = new Set<string>()
+  const deduped: Book[] = []
+
+  merged.forEach((book) => {
+    const key = book.isbn13 ?? book.isbn10 ?? `${book.title.toLowerCase()}::${book.author.toLowerCase()}`
+    if (seen.has(key)) {
+      return
+    }
+    seen.add(key)
+    deduped.push(book)
+  })
+
+  return deduped
+}

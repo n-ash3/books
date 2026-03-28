@@ -22,7 +22,12 @@ export function BookDetailPage({
   const decodedId = params.id ? decodeURIComponent(params.id) : ''
   const book = booksById[decodedId]
   const fromGenre = searchParams.get('fromGenre')
-  const backPath = fromGenre ? `/browse/genres/${encodeURIComponent(fromGenre)}` : '/'
+  const isMultiGenre = fromGenre?.includes(',')
+  const backPath = fromGenre
+    ? isMultiGenre
+      ? `/browse/genres/multi/${encodeURIComponent(fromGenre)}`
+      : `/browse/genres/${encodeURIComponent(fromGenre)}`
+    : '/'
 
   if (!book) {
     return (

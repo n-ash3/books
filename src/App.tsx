@@ -10,8 +10,10 @@ import { FindPage } from './pages/FindPage'
 import { TrackPage } from './pages/TrackPage'
 import { DiscoverPage } from './pages/DiscoverPage'
 import { BookDetailPage } from './pages/BookDetailPage'
+import { BrowsePage } from './pages/BrowsePage'
 import { GenresPage } from './pages/GenresPage'
 import { GenreBooksPage } from './pages/GenreBooksPage'
+import { MultiGenreBooksPage } from './pages/MultiGenreBooksPage'
 
 function App() {
   const initialCache = useMemo(() => loadBookCache(), [])
@@ -70,6 +72,7 @@ function App() {
         element={
           <FindPage
             books={books}
+            allBooks={bookCache}
             query={query}
             source={source}
             loading={loading}
@@ -117,6 +120,7 @@ function App() {
           />
         }
       />
+      <Route path="/browse" element={<BrowsePage />} />
       <Route
         path="/book/:id"
         element={
@@ -131,6 +135,18 @@ function App() {
         }
       />
       <Route path="/browse/genres" element={<GenresPage />} />
+      <Route
+        path="/browse/genres/multi/:selected"
+        element={
+          <MultiGenreBooksPage
+            shelves={shelves}
+            onShelfChange={(book, status) => {
+              void updateShelf(book, status)
+            }}
+            onShelfRemove={removeShelf}
+          />
+        }
+      />
       <Route
         path="/browse/genres/:genre"
         element={

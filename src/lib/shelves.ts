@@ -3,7 +3,7 @@ import type { Book, ShelfStatus } from './types'
 const STORAGE_KEY = 'book-smart.shelves.v1'
 
 export const SHELF_OPTIONS: Array<{ value: ShelfStatus; label: string }> = [
-  { value: 'want_to_read', label: 'Want to Read' },
+  { value: 'want_to_read', label: 'Want to Read (TBR)' },
   { value: 'currently_reading', label: 'Currently Reading' },
   { value: 'read', label: 'Read' },
   { value: 'did_not_finish', label: 'Did Not Finish' },
