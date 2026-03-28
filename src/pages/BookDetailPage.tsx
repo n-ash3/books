@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import type { Book, ShelfStatus, ShelfValue } from '../lib/types'
 import { buildRetailerLinks } from '../lib/retailerLinks'
@@ -11,12 +12,49 @@ interface BookDetailPageProps {
   onShelfRemove: (book: Book) => Promise<void> | void
 }
 
+type DetailTab = 'book_info' | 'reviews' | 'editions' | 'lists' | 'activity'
+
+const FOURTH_WING_ISBN13 = '9781649374042'
+
 export function BookDetailPage({
   booksById,
   shelves,
   onShelfChange,
   onShelfRemove,
 }: BookDetailPageProps) {
+  const [activeTab, setActiveTab] = useState<DetailTab>('book_info')
+  const fourthWingDemoData = useMemo(
+    () => ({
+      reviews: [
+        {
+          reviewer: 'Demo Reader A',
+          rating: 5,
+          quote: 'Dragon school tension plus romance made this impossible to put down.',
+        },
+        {
+          reviewer: 'Demo Reader B',
+          rating: 4,
+          quote: 'Fast pacing, memorable supporting cast, and strong emotional beats.',
+        },
+      ],
+      editions: [
+        { label: 'Hardcover', year: '2023', isbn: '9781649374042' },
+        { label: 'Paperback', year: '2024', isbn: '9781649377371' },
+      ],
+      lists: [
+        'Top Romantasy Starter Picks',
+        'Most Popular Dragon Rider Books',
+        'BookBoard Community Favorites',
+      ],
+      activity: [
+        'Added to Read shelf by this demo account',
+        'Marked as 5-star candidate during walkthrough',
+        'Opened from Find multi-genre filter',
+      ],
+    }),
+    [],
+  )
+
   const params = useParams<{ id: string }>()
   const [searchParams] = useSearchParams()
   const decodedId = params.id ? decodeURIComponent(params.id) : ''
@@ -47,7 +85,11 @@ export function BookDetailPage({
   }
 
   const retailerLinks = buildRetailerLinks(book)
-  const shelf = shelves[getBookIdentifier(book)] ?? 'want_to_read'
+  const isFourthWing = book.isbn13 === FOURTH_WING_ISBN13 || book.title.toLowerCase() === 'fourth wing'
+  const shelf: ShelfStatus =
+    isFourthWing
+      ? 'read'
+      : (shelves[getBookIdentifier(book)] ?? 'want_to_read')
   const detailShelfValue: ShelfValue = shelf
 
   return (
@@ -122,44 +164,146 @@ export function BookDetailPage({
           </div>
 
           <div className="detail-tabs">
-            <button type="button" className="active">
+            <button
+              type="button"
+              className={activeTab === 'book_info' ? 'active' : ''}
+              onClick={() => setActiveTab('book_info')}
+            >
               Book Info
             </button>
-            <button type="button">Reviews</button>
-            <button type="button">Editions</button>
-            <button type="button">Lists</button>
-            <button type="button">Activity</button>
+            <button
+              type="button"
+              className={activeTab === 'reviews' ? 'active' : ''}
+              onClick={() => setActiveTab('reviews')}
+            >
+              Reviews
+            </button>
+            <button
+              type="button"
+              className={activeTab === 'editions' ? 'active' : ''}
+              onClick={() => setActiveTab('editions')}
+            >
+              Editions
+            </button>
+            <button
+              type="button"
+              className={activeTab === 'lists' ? 'active' : ''}
+              onClick={() => setActiveTab('lists')}
+            >
+              Lists
+            </button>
+            <button
+              type="button"
+              className={activeTab === 'activity' ? 'active' : ''}
+              onClick={() => setActiveTab('activity')}
+            >
+              Activity
+            </button>
           </div>
 
-          <article className="detail-description">
-            <h2>Book Info</h2>
-            <p>{book.description || 'No description available yet for this title.'}</p>
-          </article>
+          {activeTab === 'book_info' ? (
+            <>
+              <article className="detail-description">
+                <h2>Book Info</h2>
+                <p>{book.description || 'No description available yet for this title.'}</p>
+              </article>
 
-          <section className="detail-meta-grid">
-            <div>
-              <h3>Genres</h3>
-              <div className="pill-row">
-                {(book.genres?.length ? book.genres : ['General']).map((genre) => (
-                  <span key={genre} className="pill">
-                    {genre}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div>
-              <h3>Metadata</h3>
-              <p>Publisher: {book.publisher ?? 'Unknown'}</p>
-              <p>Ratings: {book.ratingCount ? book.ratingCount.toLocaleString() : 'Unknown'}</p>
-              <p>ISBN-13: {book.isbn13 ?? 'Unknown'}</p>
-              <p>ISBN-10: {book.isbn10 ?? 'Unknown'}</p>
-            </div>
-          </section>
+              <section className="detail-meta-grid">
+                <div>
+                  <h3>Genres</h3>
+                  <div className="pill-row">
+                    {(book.genres?.length ? book.genres : ['General']).map((genre) => (
+                      <span key={genre} className="pill">
+                        {genre}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h3>Metadata</h3>
+                  <p>Publisher: {book.publisher ?? 'Unknown'}</p>
+                  <p>Ratings: {book.ratingCount ? book.ratingCount.toLocaleString() : 'Unknown'}</p>
+                  <p>ISBN-13: {book.isbn13 ?? 'Unknown'}</p>
+                  <p>ISBN-10: {book.isbn10 ?? 'Unknown'}</p>
+                </div>
+              </section>
 
-          {book.reviewPreview ? (
+              {book.reviewPreview ? (
+                <section className="detail-review-preview">
+                  <h3>Review preview</h3>
+                  <p>{book.reviewPreview}</p>
+                </section>
+              ) : null}
+            </>
+          ) : null}
+
+          {activeTab === 'reviews' ? (
             <section className="detail-review-preview">
-              <h3>Review preview</h3>
-              <p>{book.reviewPreview}</p>
+              <h3>Reviews</h3>
+              {isFourthWing ? (
+                <ul className="detail-list">
+                  {fourthWingDemoData.reviews.map((review) => (
+                    <li key={review.reviewer}>
+                      <strong>
+                        {review.reviewer} · {review.rating.toFixed(1)} ★
+                      </strong>
+                      <p>{review.quote}</p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>Demo review content is available only for Fourth Wing.</p>
+              )}
+            </section>
+          ) : null}
+
+          {activeTab === 'editions' ? (
+            <section className="detail-review-preview">
+              <h3>Editions</h3>
+              {isFourthWing ? (
+                <ul className="detail-list">
+                  {fourthWingDemoData.editions.map((edition) => (
+                    <li key={`${edition.label}-${edition.isbn}`}>
+                      <strong>{edition.label}</strong>
+                      <p>
+                        Year: {edition.year} · ISBN: {edition.isbn}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>Demo edition content is available only for Fourth Wing.</p>
+              )}
+            </section>
+          ) : null}
+
+          {activeTab === 'lists' ? (
+            <section className="detail-review-preview">
+              <h3>Lists</h3>
+              {isFourthWing ? (
+                <ul className="detail-list">
+                  {fourthWingDemoData.lists.map((listName) => (
+                    <li key={listName}>{listName}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p>Demo list content is available only for Fourth Wing.</p>
+              )}
+            </section>
+          ) : null}
+
+          {activeTab === 'activity' ? (
+            <section className="detail-review-preview">
+              <h3>Activity</h3>
+              {isFourthWing ? (
+                <ul className="detail-list">
+                  {fourthWingDemoData.activity.map((entry) => (
+                    <li key={entry}>{entry}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p>Demo activity content is available only for Fourth Wing.</p>
+              )}
             </section>
           ) : null}
         </section>

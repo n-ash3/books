@@ -1083,6 +1083,18 @@ a {
   color: #c8d4f6;
 }
 
+.detail-list {
+  margin: 0.6rem 0 0;
+  padding-left: 1.05rem;
+  display: grid;
+  gap: 0.55rem;
+  color: #c8d4f6;
+}
+
+.detail-list li p {
+  margin-top: 0.2rem;
+}
+
 .detail-not-found {
   padding: 1rem;
 }

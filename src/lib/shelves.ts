@@ -1,6 +1,10 @@
 import type { Book, ShelfStatus } from './types'
 
 const STORAGE_KEY = 'book-smart.shelves.v1'
+const FOURTH_WING_SHELF_KEY = '9781649374042'
+const DEMO_DEFAULT_SHELVES: Record<string, ShelfStatus> = {
+  [FOURTH_WING_SHELF_KEY]: 'read',
+}
 
 export const SHELF_OPTIONS: Array<{ value: ShelfStatus; label: string }> = [
   { value: 'want_to_read', label: 'Want to Read (TBR)' },
@@ -27,13 +31,16 @@ export function loadShelves(): Record<string, ShelfStatus> {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) {
-      return {}
+      return { ...DEMO_DEFAULT_SHELVES }
     }
 
     const parsed = JSON.parse(raw) as Record<string, ShelfStatus>
-    return parsed ?? {}
+    if (!parsed) {
+      return { ...DEMO_DEFAULT_SHELVES }
+    }
+    return { ...DEMO_DEFAULT_SHELVES, ...parsed }
   } catch {
-    return {}
+    return { ...DEMO_DEFAULT_SHELVES }
   }
 }
 
