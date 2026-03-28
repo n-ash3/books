@@ -177,51 +177,10 @@ a {
   min-height: 180px;
   border: 1px solid #364f86;
   border-radius: var(--radius-md);
-  background: linear-gradient(180deg, #1a2a50, #202f58);
-  position: relative;
+  background:
+    linear-gradient(180deg, rgba(22, 35, 68, 0.86), rgba(21, 34, 66, 0.86)),
+    url('/hero-reading-scene.svg') center/cover no-repeat;
   overflow: hidden;
-}
-
-.ill-shelf {
-  position: absolute;
-  left: 24%;
-  bottom: 20%;
-  width: 46%;
-  height: 60%;
-  border: 4px solid #6176bd;
-  border-radius: 8px;
-}
-
-.ill-person {
-  position: absolute;
-  bottom: 10%;
-  width: 50px;
-  height: 80px;
-  border-radius: 18px;
-  background: linear-gradient(180deg, #7a8eff, #5268d6);
-}
-
-.ill-person::before {
-  content: '';
-  position: absolute;
-  top: -20px;
-  left: 12px;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #c6d3ff;
-}
-
-.ill-person--one {
-  left: 12%;
-}
-
-.ill-person--two {
-  left: 56%;
-}
-
-.ill-person--three {
-  right: 12%;
 }
 
 /* Home tiles */

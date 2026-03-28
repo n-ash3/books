@@ -16,12 +16,7 @@ export function HomePage() {
               </p>
               <p className="landing-helper">Choose where you want to start:</p>
             </div>
-            <div className="home-hero-illustration" aria-hidden="true">
-              <div className="ill-shelf" />
-              <div className="ill-person ill-person--one" />
-              <div className="ill-person ill-person--two" />
-              <div className="ill-person ill-person--three" />
-            </div>
+            <div className="home-hero-illustration" aria-hidden="true" />
           </div>
         </section>
 
