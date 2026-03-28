@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import type { Book, ShelfStatus, ShelfValue } from '../lib/types'
 import { buildRetailerLinks } from '../lib/retailerLinks'
 import { formatShelfLabel, getBookIdentifier } from '../lib/shelves'
 import { ShelfSelector } from '../components/ShelfSelector'
 import { CoverImage } from '../components/CoverImage'
+import { fetchOpenLibraryDetails } from '../lib/openLibraryDetails'
 
 interface BookDetailPageProps {
   booksById: Record<string, Book>
@@ -24,6 +25,7 @@ export function BookDetailPage({
   onShelfRemove,
 }: BookDetailPageProps) {
   const [activeTab, setActiveTab] = useState<DetailTab>('book_info')
+  const [enrichedDetailsById, setEnrichedDetailsById] = useState<Record<string, Partial<Book>>>({})
   const fourthWingDemoData = useMemo(
     () => ({
       reviews: [
@@ -68,6 +70,26 @@ export function BookDetailPage({
       : `/browse/genres/${encodeURIComponent(fromGenre)}`
     : '/'
 
+  useEffect(() => {
+    if (!book) {
+      return
+    }
+    let active = true
+    void (async () => {
+      const details = await fetchOpenLibraryDetails(book)
+      if (!active || !details) {
+        return
+      }
+      setEnrichedDetailsById((previous) => ({
+        ...previous,
+        [book.id]: details,
+      }))
+    })()
+    return () => {
+      active = false
+    }
+  }, [book])
+
   if (!book) {
     return (
       <div className="app-shell">
@@ -85,12 +107,17 @@ export function BookDetailPage({
     )
   }
 
-  const retailerLinks = buildRetailerLinks(book)
-  const isFourthWing = book.isbn13 === FOURTH_WING_ISBN13 || book.title.toLowerCase() === 'fourth wing'
+  const displayBook = {
+    ...book,
+    ...(enrichedDetailsById[book.id] ?? {}),
+  }
+  const retailerLinks = buildRetailerLinks(displayBook)
+  const isFourthWing =
+    displayBook.isbn13 === FOURTH_WING_ISBN13 || displayBook.title.toLowerCase() === 'fourth wing'
   const shelf: ShelfStatus =
     isFourthWing
       ? 'read'
-      : (shelves[getBookIdentifier(book)] ?? 'want_to_read')
+      : (shelves[getBookIdentifier(displayBook)] ?? 'want_to_read')
   const detailShelfValue: ShelfValue = shelf
 
   return (
@@ -108,30 +135,30 @@ export function BookDetailPage({
           <div className="detail-top">
             <div className="detail-cover-wrap">
               <CoverImage
-                book={book}
-                alt={`${book.title} cover`}
+                book={displayBook}
+                alt={`${displayBook.title} cover`}
                 className="detail-cover"
                 placeholderClassName="detail-cover detail-cover--placeholder"
               />
             </div>
 
             <div className="detail-main">
-              <p className="detail-kicker">{book.source.toUpperCase()} SOURCE</p>
-              <h1>{book.title}</h1>
-              <p className="detail-author">By {book.author}</p>
+              <p className="detail-kicker">{displayBook.source.toUpperCase()} SOURCE</p>
+              <h1>{displayBook.title}</h1>
+              <p className="detail-author">By {displayBook.author}</p>
 
               <div className="detail-stats">
                 <div>
                   <span>Published</span>
-                  <strong>{book.releaseDate || 'Unknown'}</strong>
+                  <strong>{displayBook.releaseDate || 'Unknown'}</strong>
                 </div>
                 <div>
                   <span>Pages</span>
-                  <strong>{book.pages ? String(book.pages) : 'Unknown'}</strong>
+                  <strong>{displayBook.pages ? String(displayBook.pages) : 'Unknown'}</strong>
                 </div>
                 <div>
                   <span>Average rating</span>
-                  <strong>{book.rating ? `${book.rating.toFixed(1)} ★` : 'Not available'}</strong>
+                  <strong>{displayBook.rating ? `${displayBook.rating.toFixed(1)} ★` : 'Not available'}</strong>
                 </div>
               </div>
 
@@ -142,10 +169,10 @@ export function BookDetailPage({
                 allowRemove
                 onChange={(status) => {
                   if (status === 'none') {
-                    void onShelfRemove(book)
+                    void onShelfRemove(displayBook)
                     return
                   }
-                  onShelfChange(book, status)
+                  onShelfChange(displayBook, status)
                 }}
               />
               <p className="shelf-preview">Current shelf: {formatShelfLabel(shelf)}</p>
@@ -156,8 +183,8 @@ export function BookDetailPage({
                     Buy on {link.name}
                   </a>
                 ))}
-                {book.canonicalUrl ? (
-                  <a href={book.canonicalUrl} target="_blank" rel="noreferrer">
+                {displayBook.canonicalUrl ? (
+                  <a href={displayBook.canonicalUrl} target="_blank" rel="noreferrer">
                     View canonical listing
                   </a>
                 ) : null}
@@ -207,14 +234,14 @@ export function BookDetailPage({
             <>
               <article className="detail-description">
                 <h2>Book Info</h2>
-                <p>{book.description || 'No description available yet for this title.'}</p>
+                <p>{displayBook.description || 'No description available yet for this title.'}</p>
               </article>
 
               <section className="detail-meta-grid">
                 <div>
                   <h3>Genres</h3>
                   <div className="pill-row">
-                    {(book.genres?.length ? book.genres : ['General']).map((genre) => (
+                    {(displayBook.genres?.length ? displayBook.genres : ['General']).map((genre) => (
                       <span key={genre} className="pill">
                         {genre}
                       </span>
@@ -223,17 +250,17 @@ export function BookDetailPage({
                 </div>
                 <div>
                   <h3>Metadata</h3>
-                  <p>Publisher: {book.publisher ?? 'Unknown'}</p>
-                  <p>Ratings: {book.ratingCount ? book.ratingCount.toLocaleString() : 'Unknown'}</p>
-                  <p>ISBN-13: {book.isbn13 ?? 'Unknown'}</p>
-                  <p>ISBN-10: {book.isbn10 ?? 'Unknown'}</p>
+                  <p>Publisher: {displayBook.publisher ?? 'Unknown'}</p>
+                  <p>Ratings: {displayBook.ratingCount ? displayBook.ratingCount.toLocaleString() : 'Unknown'}</p>
+                  <p>ISBN-13: {displayBook.isbn13 ?? 'Unknown'}</p>
+                  <p>ISBN-10: {displayBook.isbn10 ?? 'Unknown'}</p>
                 </div>
               </section>
 
-              {book.reviewPreview ? (
+              {displayBook.reviewPreview ? (
                 <section className="detail-review-preview">
                   <h3>Review preview</h3>
-                  <p>{book.reviewPreview}</p>
+                  <p>{displayBook.reviewPreview}</p>
                 </section>
               ) : null}
             </>
