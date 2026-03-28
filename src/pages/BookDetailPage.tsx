@@ -4,6 +4,7 @@ import type { Book, ShelfStatus, ShelfValue } from '../lib/types'
 import { buildRetailerLinks } from '../lib/retailerLinks'
 import { formatShelfLabel, getBookIdentifier } from '../lib/shelves'
 import { ShelfSelector } from '../components/ShelfSelector'
+import { resolveCoverCandidates } from '../lib/coverFallback'
 
 interface BookDetailPageProps {
   booksById: Record<string, Book>
@@ -85,6 +86,8 @@ export function BookDetailPage({
   }
 
   const retailerLinks = buildRetailerLinks(book)
+  const coverCandidates = resolveCoverCandidates(book)
+  const coverSrc = coverCandidates[0]
   const isFourthWing = book.isbn13 === FOURTH_WING_ISBN13 || book.title.toLowerCase() === 'fourth wing'
   const shelf: ShelfStatus =
     isFourthWing
@@ -106,11 +109,33 @@ export function BookDetailPage({
 
           <div className="detail-top">
             <div className="detail-cover-wrap">
-              {book.coverUrl ? (
-                <img src={book.coverUrl} alt={`${book.title} cover`} className="detail-cover" />
+              {coverSrc ? (
+                <img
+                  src={coverSrc}
+                  alt={`${book.title} cover`}
+                  className="detail-cover"
+                  data-cover-index="0"
+                  onError={(event) => {
+                    const img = event.currentTarget
+                    const nextIndex = Number(img.dataset.coverIndex ?? '0') + 1
+                    if (nextIndex < coverCandidates.length) {
+                      img.dataset.coverIndex = String(nextIndex)
+                      img.src = coverCandidates[nextIndex]
+                      return
+                    }
+                    img.style.display = 'none'
+                    const fallback = img.nextElementSibling as HTMLElement | null
+                    if (fallback) {
+                      fallback.style.display = 'grid'
+                    }
+                  }}
+                />
               ) : (
                 <div className="detail-cover detail-cover--placeholder">No cover</div>
               )}
+              <div className="detail-cover detail-cover--placeholder" style={{ display: 'none' }}>
+                No cover
+              </div>
             </div>
 
             <div className="detail-main">
