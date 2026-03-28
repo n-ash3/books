@@ -3,9 +3,12 @@ import { Route, Routes } from 'react-router-dom'
 import type { Book, ShelfStatus } from './lib/types'
 import { loadBookCache } from './lib/bookStore'
 import { getBookIdentifier, loadShelves, persistShelves, removeShelfValue } from './lib/shelves'
-import { hasShelfSyncEndpoint, syncShelfChange } from './lib/shelfSync'
+import { syncShelfChange } from './lib/shelfSync'
 import { useBookSearch } from './hooks/useBookSearch'
 import { HomePage } from './pages/HomePage'
+import { FindPage } from './pages/FindPage'
+import { TrackPage } from './pages/TrackPage'
+import { DiscoverPage } from './pages/DiscoverPage'
 import { BookDetailPage } from './pages/BookDetailPage'
 import { GenresPage } from './pages/GenresPage'
 import { GenreBooksPage } from './pages/GenreBooksPage'
@@ -60,10 +63,12 @@ function App() {
 
   return (
     <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/home" element={<HomePage />} />
       <Route
-        path="/"
+        path="/find"
         element={
-          <HomePage
+          <FindPage
             books={books}
             query={query}
             source={source}
@@ -71,7 +76,6 @@ function App() {
             error={error}
             hasSearched={hasSearched}
             shelves={shelves}
-            shelfSyncEnabled={hasShelfSyncEndpoint()}
             onSearchDebounced={(value) => {
               void runSearch(value)
             }}
@@ -84,6 +88,32 @@ function App() {
             onShelfRemove={(book) => {
               return removeShelf(book)
             }}
+          />
+        }
+      />
+      <Route
+        path="/track"
+        element={
+          <TrackPage
+            books={bookCache}
+            shelves={shelves}
+            onShelfChange={(book, status) => {
+              void updateShelf(book, status)
+            }}
+            onShelfRemove={removeShelf}
+          />
+        }
+      />
+      <Route
+        path="/discover"
+        element={
+          <DiscoverPage
+            books={bookCache}
+            shelves={shelves}
+            onShelfChange={(book, status) => {
+              void updateShelf(book, status)
+            }}
+            onShelfRemove={removeShelf}
           />
         }
       />

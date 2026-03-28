@@ -1,126 +1,58 @@
-import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { BookGrid } from '../components/BookGrid'
-import { SearchBar } from '../components/SearchBar'
-import { SearchState } from '../components/SearchState'
-import { SourceBadge } from '../components/SourceBadge'
 import { HardcoverHeader } from '../components/HardcoverHeader'
-import type { Book, SearchResult, ShelfStatus } from '../lib/types'
 
-interface HomePageProps {
-  books: Book[]
-  query: string
-  source: SearchResult['source']
-  loading: boolean
-  error: string
-  hasSearched: boolean
-  shelves: Record<string, ShelfStatus>
-  shelfSyncEnabled: boolean
-  onSearchDebounced: (value: string) => void
-  onSearchSubmit: (value: string) => void
-  onShelfChange: (book: Book, status: ShelfStatus) => void
-  onShelfRemove: (book: Book) => Promise<void> | void
-}
-
-export function HomePage({
-  books,
-  query,
-  source,
-  loading,
-  error,
-  hasSearched,
-  shelves,
-  shelfSyncEnabled,
-  onSearchDebounced,
-  onSearchSubmit,
-  onShelfChange,
-  onShelfRemove,
-}: HomePageProps) {
-  const hasQuery = query.trim().length > 0
-  const showResults = !loading && books.length > 0
-
-  const featureBlocks = useMemo(
-    () => [
-      {
-        title: 'Find',
-        content: 'Search across Hardcover, Google Books, and Open Library in one place.',
-      },
-      {
-        title: 'Track',
-        content: 'Use shelf states like Want to Read, Reading, Read, and DNF.',
-      },
-      {
-        title: 'Connect',
-        content: 'Structured like modern social book platforms with room to grow.',
-      },
-      {
-        title: 'Discover',
-        content: 'Fast, grid-friendly browsing with click-through detail pages.',
-      },
-    ],
-    [],
-  )
-
+export function HomePage() {
   return (
     <div className="browse-root">
       <HardcoverHeader />
       <main className="browse-main">
-        <section className="browse-panel">
-          <h1>Browse</h1>
-          <p className="browse-subtitle">
-            Choose a section. Genre browsing now has clickable categories and scrollable book lists.
-          </p>
-          <div className="feature-panel browse-tiles">
-            {featureBlocks.map((feature) => {
-              const to = feature.title === 'Find' ? '/' : '/browse/genres'
-              return (
-                <Link key={feature.title} className="browse-tile-link" to={to}>
-                  <article>
-                    <h2>{feature.title}</h2>
-                    <p>{feature.content}</p>
-                  </article>
-                </Link>
-              )
-            })}
+        <section className="browse-panel home-hero-panel">
+          <div className="home-hero-grid">
+            <div className="home-hero-copy">
+              <h1>Book smart.</h1>
+              <p className="browse-subtitle">
+                Track every book, share them with the world (or don&apos;t), and discover your next
+                life-changing read.
+              </p>
+              <p className="landing-helper">Choose where you want to start:</p>
+            </div>
+            <div className="home-hero-illustration" aria-hidden="true">
+              <div className="ill-shelf" />
+              <div className="ill-person ill-person--one" />
+              <div className="ill-person ill-person--two" />
+              <div className="ill-person ill-person--three" />
+            </div>
           </div>
         </section>
 
-        <section className="panel search-panel">
-          <SearchBar
-            value={query}
-            onDebouncedChange={onSearchDebounced}
-            onSubmit={onSearchSubmit}
-            loading={loading}
-          />
-          <SourceBadge source={source} />
-          <p className="source-note">
-            Shelf sync:{' '}
-            <strong>{shelfSyncEnabled ? 'Connected to backend' : 'Local-only (set Django sync URL)'}</strong>
-          </p>
-          <p className="source-note">
-            Want genre browsing? <Link to="/browse/genres">Open Genres</Link>
-          </p>
-          {error ? <p className="inline-alert">{error}</p> : null}
-        </section>
+        <section className="feature-panel browse-tiles">
+          <Link className="browse-tile-link" to="/find">
+            <article>
+              <h2>Find</h2>
+              <p>Search and browse books with a large catalog and dedicated search page.</p>
+            </article>
+          </Link>
 
-        <section className="panel discover-panel">
-          <div className="section-title">
-            <h2>Discover</h2>
-            <p>Compact cards. Click any card for details.</p>
-          </div>
-          <SearchState
-            loading={loading}
-            hasQuery={hasQuery || hasSearched}
-            hasResults={books.length > 0}
-          />
-          {showResults ? (
-            <BookGrid
-              books={books}
-              shelves={shelves}
-              onShelfChange={onShelfChange}
-              onShelfRemove={onShelfRemove}
-            />
-          ) : null}
+          <Link className="browse-tile-link" to="/track">
+            <article>
+              <h2>Track</h2>
+              <p>See your TBR, currently reading, read, and did-not-finish shelves.</p>
+            </article>
+          </Link>
+
+          <Link className="browse-tile-link" to="/discover">
+            <article>
+              <h2>Discover</h2>
+              <p>Get recommendations similar to books you already marked as read.</p>
+            </article>
+          </Link>
+
+          <Link className="browse-tile-link" to="/browse/genres">
+            <article>
+              <h2>Browse Genres</h2>
+              <p>Open genre choices, then scroll and click through full genre book feeds.</p>
+            </article>
+          </Link>
         </section>
       </main>
     </div>
