@@ -1,4 +1,5 @@
 import type { Book } from '../lib/types'
+import { hasAnyCoverCandidate } from '../lib/coverFallback'
 
 interface FallbackSeed {
   title: string
@@ -892,11 +893,12 @@ const SEED_BOOKS: FallbackSeed[] = [
 
 export const FALLBACK_BOOKS: Book[] = SEED_BOOKS.map((seed) => {
   const slug = slugify(seed.title)
-  return {
+  const book: Book = {
     id: `fallback-${slug}`,
     source: 'fallback',
     slug,
     canonicalUrl: `https://hardcover.app/books/${slug}`,
     ...seed,
   }
-})
+  return book
+}).filter((book) => hasAnyCoverCandidate(book))

@@ -1,4 +1,5 @@
 import { FALLBACK_BOOKS } from '../data/fallbackBooks'
+import { hasAnyCoverCandidate } from './coverFallback'
 import type { Book } from './types'
 
 const STORAGE_KEY = 'book-smart.books-cache.v2'
@@ -27,7 +28,7 @@ export function loadBookCache(): Book[] {
     if (!Array.isArray(parsed)) {
       return FALLBACK_BOOKS
     }
-    return mergeUniqueBooks(FALLBACK_BOOKS, parsed)
+    return mergeUniqueBooks(FALLBACK_BOOKS, parsed).filter((book) => hasAnyCoverCandidate(book))
   } catch {
     return FALLBACK_BOOKS
   }
@@ -38,7 +39,7 @@ export function persistBookCache(books: Book[]): void {
 }
 
 export function updateBookCacheWithResults(currentCache: Book[], results: Book[]): Book[] {
-  const merged = mergeUniqueBooks(currentCache, results)
+  const merged = mergeUniqueBooks(currentCache, results).filter((book) => hasAnyCoverCandidate(book))
   persistBookCache(merged)
   return merged
 }

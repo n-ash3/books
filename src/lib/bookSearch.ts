@@ -1,4 +1,5 @@
 import { FALLBACK_BOOKS } from '../data/fallbackBooks'
+import { hasAnyCoverCandidate } from './coverFallback'
 import { searchGoogleBooks } from './googleBooksApi'
 import { hasHardcoverToken, searchHardcoverBooks } from './hardcoverApi'
 import { searchOpenLibraryBooks } from './openLibraryApi'
@@ -137,7 +138,9 @@ export async function searchBooks(query: string): Promise<SearchResult> {
   const googleBooks = googleResult.status === 'fulfilled' ? googleResult.value : []
   const openLibraryBooks = openLibraryResult.status === 'fulfilled' ? openLibraryResult.value : []
 
-  const merged = mergeProviderResults(hardcoverBooks, googleBooks, openLibraryBooks)
+  const merged = mergeProviderResults(hardcoverBooks, googleBooks, openLibraryBooks).filter((book) =>
+    hasAnyCoverCandidate(book),
+  )
 
   const failed = [hardcoverResult, googleResult, openLibraryResult].filter(
     (entry) => entry.status === 'rejected',

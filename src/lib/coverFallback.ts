@@ -76,3 +76,7 @@ export async function fetchOpenLibraryCoverCandidate(
     return null
   }
 }
+
+export function hasAnyCoverCandidate(book: Pick<Book, 'coverUrl' | 'isbn13' | 'isbn10'>): boolean {
+  return resolveCoverCandidates(book).length > 0
+}

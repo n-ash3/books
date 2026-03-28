@@ -1,5 +1,6 @@
 import { HardcoverHeader } from '../components/HardcoverHeader'
 import { BookGrid } from '../components/BookGrid'
+import { hasAnyCoverCandidate } from '../lib/coverFallback'
 import { getShelfValue } from '../lib/shelves'
 import type { Book, ShelfStatus } from '../lib/types'
 
@@ -27,7 +28,8 @@ function scoreBySimilarity(candidate: Book, readGenres: Set<string>, readAuthors
 }
 
 export function DiscoverPage({ books, shelves, onShelfChange, onShelfRemove }: DiscoverPageProps) {
-  const readBooks = books.filter((book) => getShelfValue(book, shelves) === 'read')
+  const booksWithCoverCandidates = books.filter((book) => hasAnyCoverCandidate(book))
+  const readBooks = booksWithCoverCandidates.filter((book) => getShelfValue(book, shelves) === 'read')
   const readIds = new Set(readBooks.map((book) => book.id))
 
   const readGenres = new Set(
@@ -35,7 +37,7 @@ export function DiscoverPage({ books, shelves, onShelfChange, onShelfRemove }: D
   )
   const readAuthors = new Set(readBooks.map((book) => book.author.toLowerCase()))
 
-  const recommendations = books
+  const recommendations = booksWithCoverCandidates
     .filter((book) => !readIds.has(book.id))
     .map((book) => ({
       book,
