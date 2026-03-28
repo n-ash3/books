@@ -7,14 +7,22 @@ interface BookCardProps {
   shelfValue: ShelfStatus
   onShelfChange: (book: Book, status: ShelfStatus) => void
   onShelfRemove: (book: Book) => Promise<void> | void
+  detailsPath?: string
 }
 
-export function BookCard({ book, shelfValue, onShelfChange, onShelfRemove }: BookCardProps) {
+export function BookCard({
+  book,
+  shelfValue,
+  onShelfChange,
+  onShelfRemove,
+  detailsPath,
+}: BookCardProps) {
   const cardShelfValue: ShelfValue = shelfValue
+  const destination = detailsPath ?? `/book/${encodeURIComponent(book.id)}`
 
   return (
     <article className="book-card" key={book.id}>
-      <Link className="book-link" to={`/book/${encodeURIComponent(book.id)}`}>
+      <Link className="book-link" to={destination}>
         {book.coverUrl ? (
           <img src={book.coverUrl} alt={`${book.title} cover`} className="book-cover" />
         ) : (
@@ -25,7 +33,7 @@ export function BookCard({ book, shelfValue, onShelfChange, onShelfRemove }: Boo
       </Link>
       <div className="book-meta">
         <h3>
-          <Link className="book-link" to={`/book/${encodeURIComponent(book.id)}`}>
+          <Link className="book-link" to={destination}>
             {book.title}
           </Link>
         </h3>
@@ -58,7 +66,7 @@ export function BookCard({ book, shelfValue, onShelfChange, onShelfRemove }: Boo
         >
           Remove
         </button>
-        <Link className="details-cta" to={`/book/${encodeURIComponent(book.id)}`}>
+        <Link className="details-cta" to={destination}>
           Open details
         </Link>
       </div>

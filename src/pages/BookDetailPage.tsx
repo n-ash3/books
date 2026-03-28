@@ -1,4 +1,4 @@
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useSearchParams } from 'react-router-dom'
 import type { Book, ShelfStatus, ShelfValue } from '../lib/types'
 import { buildRetailerLinks } from '../lib/retailerLinks'
 import { formatShelfLabel, getBookIdentifier } from '../lib/shelves'
@@ -18,8 +18,11 @@ export function BookDetailPage({
   onShelfRemove,
 }: BookDetailPageProps) {
   const params = useParams<{ id: string }>()
+  const [searchParams] = useSearchParams()
   const decodedId = params.id ? decodeURIComponent(params.id) : ''
   const book = booksById[decodedId]
+  const fromGenre = searchParams.get('fromGenre')
+  const backPath = fromGenre ? `/browse/genres/${encodeURIComponent(fromGenre)}` : '/'
 
   if (!book) {
     return (
@@ -30,8 +33,8 @@ export function BookDetailPage({
             This book is not in your current cache yet. Go back and run a search,
             then open the title from the results.
           </p>
-          <Link to="/" className="details-cta">
-            Back to search
+          <Link to={backPath} className="details-cta">
+            Back
           </Link>
         </section>
       </div>
@@ -48,7 +51,7 @@ export function BookDetailPage({
       <div className="app-shell detail-shell">
         <section className="panel detail-card">
           <nav className="detail-nav">
-            <Link to="/">Back to Discover</Link>
+            <Link to={backPath}>Back to Browse</Link>
             <a href="https://hardcover.app/" target="_blank" rel="noreferrer">
               Hardcover
             </a>

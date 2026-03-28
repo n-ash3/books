@@ -7,6 +7,8 @@ import { hasShelfSyncEndpoint, syncShelfChange } from './lib/shelfSync'
 import { useBookSearch } from './hooks/useBookSearch'
 import { HomePage } from './pages/HomePage'
 import { BookDetailPage } from './pages/BookDetailPage'
+import { GenresPage } from './pages/GenresPage'
+import { GenreBooksPage } from './pages/GenreBooksPage'
 
 function App() {
   const initialCache = useMemo(() => loadBookCache(), [])
@@ -90,6 +92,19 @@ function App() {
         element={
           <BookDetailPage
             booksById={booksById}
+            shelves={shelves}
+            onShelfChange={(book, status) => {
+              void updateShelf(book, status)
+            }}
+            onShelfRemove={removeShelf}
+          />
+        }
+      />
+      <Route path="/browse/genres" element={<GenresPage />} />
+      <Route
+        path="/browse/genres/:genre"
+        element={
+          <GenreBooksPage
             shelves={shelves}
             onShelfChange={(book, status) => {
               void updateShelf(book, status)

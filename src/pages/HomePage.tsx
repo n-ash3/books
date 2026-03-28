@@ -1,8 +1,10 @@
 import { useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import { BookGrid } from '../components/BookGrid'
 import { SearchBar } from '../components/SearchBar'
 import { SearchState } from '../components/SearchState'
 import { SourceBadge } from '../components/SourceBadge'
+import { HardcoverHeader } from '../components/HardcoverHeader'
 import type { Book, SearchResult, ShelfStatus } from '../lib/types'
 
 interface HomePageProps {
@@ -60,55 +62,67 @@ export function HomePage({
   )
 
   return (
-    <div className="app-shell">
-      <header className="hero">
-        <p className="eyebrow">Book Smart</p>
-        <h1>Track books with a modern, Hardcover-style reading workflow.</h1>
-        <p className="hero-copy">
-          Compact cards for browsing. Rich detail pages for deep info. Multi-provider search for
-          broader book coverage.
-        </p>
-      </header>
+    <div className="browse-root">
+      <HardcoverHeader />
+      <main className="browse-main">
+        <section className="browse-panel">
+          <h1>Browse</h1>
+          <p className="browse-subtitle">
+            Choose a section. Genre browsing now has clickable categories and scrollable book lists.
+          </p>
+          <div className="feature-panel browse-tiles">
+            {featureBlocks.map((feature) => {
+              const to = feature.title === 'Find' ? '/' : '/browse/genres'
+              return (
+                <Link key={feature.title} className="browse-tile-link" to={to}>
+                  <article>
+                    <h2>{feature.title}</h2>
+                    <p>{feature.content}</p>
+                  </article>
+                </Link>
+              )
+            })}
+          </div>
+        </section>
 
-      <section className="panel feature-panel">
-        {featureBlocks.map((feature) => (
-          <article key={feature.title}>
-            <h2>{feature.title}</h2>
-            <p>{feature.content}</p>
-          </article>
-        ))}
-      </section>
-
-      <section className="panel search-panel">
-        <SearchBar
-          value={query}
-          onDebouncedChange={onSearchDebounced}
-          onSubmit={onSearchSubmit}
-          loading={loading}
-        />
-        <SourceBadge source={source} />
-        <p className="source-note">
-          Shelf sync:{' '}
-          <strong>{shelfSyncEnabled ? 'Connected to backend' : 'Local-only (set Django sync URL)'}</strong>
-        </p>
-        {error ? <p className="inline-alert">{error}</p> : null}
-      </section>
-
-      <section className="panel discover-panel">
-        <div className="section-title">
-          <h2>Discover</h2>
-          <p>Cards are intentionally compact. Open any card for full book details.</p>
-        </div>
-        <SearchState loading={loading} hasQuery={hasQuery || hasSearched} hasResults={books.length > 0} />
-        {showResults ? (
-          <BookGrid
-            books={books}
-            shelves={shelves}
-            onShelfChange={onShelfChange}
-            onShelfRemove={onShelfRemove}
+        <section className="panel search-panel">
+          <SearchBar
+            value={query}
+            onDebouncedChange={onSearchDebounced}
+            onSubmit={onSearchSubmit}
+            loading={loading}
           />
-        ) : null}
-      </section>
+          <SourceBadge source={source} />
+          <p className="source-note">
+            Shelf sync:{' '}
+            <strong>{shelfSyncEnabled ? 'Connected to backend' : 'Local-only (set Django sync URL)'}</strong>
+          </p>
+          <p className="source-note">
+            Want genre browsing? <Link to="/browse/genres">Open Genres</Link>
+          </p>
+          {error ? <p className="inline-alert">{error}</p> : null}
+        </section>
+
+        <section className="panel discover-panel">
+          <div className="section-title">
+            <h2>Discover</h2>
+            <p>Compact cards. Click any card for details.</p>
+          </div>
+          <SearchState
+            loading={loading}
+            hasQuery={hasQuery || hasSearched}
+            hasResults={books.length > 0}
+          />
+          {showResults ? (
+            <BookGrid
+              books={books}
+              shelves={shelves}
+              onShelfChange={onShelfChange}
+              onShelfRemove={onShelfRemove}
+            />
+          ) : null}
+        </section>
+      </main>
     </div>
   )
 }

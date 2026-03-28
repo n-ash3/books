@@ -7,9 +7,16 @@ interface BookGridProps {
   shelves: Record<string, ShelfStatus>
   onShelfChange: (book: Book, status: ShelfStatus) => void
   onShelfRemove: (book: Book) => void
+  detailsPathForBook?: (book: Book) => string
 }
 
-export function BookGrid({ books, shelves, onShelfChange, onShelfRemove }: BookGridProps) {
+export function BookGrid({
+  books,
+  shelves,
+  onShelfChange,
+  onShelfRemove,
+  detailsPathForBook,
+}: BookGridProps) {
   return (
     <div className="book-grid">
       {books.map((book) => (
@@ -19,6 +26,7 @@ export function BookGrid({ books, shelves, onShelfChange, onShelfRemove }: BookG
           shelfValue={getShelfValue(book, shelves)}
           onShelfChange={onShelfChange}
           onShelfRemove={onShelfRemove}
+          detailsPath={detailsPathForBook?.(book)}
         />
       ))}
     </div>

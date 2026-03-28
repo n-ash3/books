@@ -8,6 +8,11 @@ export type ShelfValue = ShelfStatus | 'none'
 
 export type BookSource = 'hardcover' | 'googlebooks' | 'openlibrary' | 'fallback'
 
+export interface GenreCount {
+  name: string
+  count: number
+}
+
 export interface Book {
   id: string
   source: BookSource
