@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom'
-import { useState } from 'react'
 import { ShelfSelector } from './ShelfSelector'
-import { resolveCoverCandidates } from '../lib/coverFallback'
+import { CoverImage } from './CoverImage'
 import type { Book, ShelfStatus, ShelfValue } from '../lib/types'
 
 interface BookCardProps {
@@ -19,33 +18,18 @@ export function BookCard({
   onShelfRemove,
   detailsPath,
 }: BookCardProps) {
-  const [coverIndex, setCoverIndex] = useState(0)
   const cardShelfValue: ShelfValue = shelfValue
   const destination = detailsPath ?? `/book/${encodeURIComponent(book.id)}`
-  const coverCandidates = resolveCoverCandidates(book)
-  const coverUrl = coverCandidates[coverIndex]
 
   return (
     <article className="book-card" key={book.id}>
       <Link className="book-link" to={destination}>
-        {coverUrl ? (
-          <img
-            src={coverUrl}
-            alt={`${book.title} cover`}
-            className="book-cover"
-            onError={() => {
-              if (coverIndex < coverCandidates.length - 1) {
-                setCoverIndex((previous) => previous + 1)
-              } else {
-                setCoverIndex(coverCandidates.length)
-              }
-            }}
-          />
-        ) : (
-          <div className="book-cover book-cover--placeholder" aria-hidden="true">
-            No cover
-          </div>
-        )}
+        <CoverImage
+          book={book}
+          alt={`${book.title} cover`}
+          className="book-cover"
+          placeholderClassName="book-cover book-cover--placeholder"
+        />
       </Link>
       <div className="book-meta">
         <h3>

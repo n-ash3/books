@@ -1,28 +1,12 @@
-import type { SyntheticEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { HardcoverHeader } from '../components/HardcoverHeader'
 import { FALLBACK_BOOKS } from '../data/fallbackBooks'
-import { resolveCoverCandidates } from '../lib/coverFallback'
+import { CoverImage } from '../components/CoverImage'
 
 export function HomePage() {
   const trending = [...FALLBACK_BOOKS]
     .sort((a, b) => (b.ratingCount ?? 0) - (a.ratingCount ?? 0))
     .slice(0, 6)
-
-  function handleTrendCoverError(event: SyntheticEvent<HTMLImageElement>, candidates: string[]): void {
-    const img = event.currentTarget
-    const nextIndex = Number(img.dataset.coverIndex ?? '0') + 1
-    if (nextIndex < candidates.length) {
-      img.dataset.coverIndex = String(nextIndex)
-      img.src = candidates[nextIndex]
-      return
-    }
-    img.style.display = 'none'
-    const fallback = img.nextElementSibling as HTMLElement | null
-    if (fallback) {
-      fallback.style.display = 'grid'
-    }
-  }
 
   return (
     <div className="browse-root">
@@ -97,23 +81,12 @@ export function HomePage() {
             {trending.map((book, index) => (
               <article key={book.id} className="home-trend-card">
                 <span className="home-trend-rank">#{index + 1}</span>
-                {(() => {
-                  const coverCandidates = resolveCoverCandidates(book)
-                  return coverCandidates[0] ? (
-                    <img
-                      src={coverCandidates[0]}
-                      alt={`${book.title} cover`}
-                      className="home-trend-cover"
-                      data-cover-index="0"
-                      onError={(event) => handleTrendCoverError(event, coverCandidates)}
-                    />
-                  ) : (
-                    <div className="home-trend-cover home-trend-cover--placeholder">No cover</div>
-                  )
-                })()}
-                <div className="home-trend-cover home-trend-cover--placeholder" style={{ display: 'none' }}>
-                  No cover
-                </div>
+                <CoverImage
+                  book={book}
+                  alt={`${book.title} cover`}
+                  className="home-trend-cover"
+                  placeholderClassName="home-trend-cover home-trend-cover--placeholder"
+                />
                 <div className="home-trend-meta">
                   <h3>{book.title}</h3>
                   <p>{book.author}</p>
