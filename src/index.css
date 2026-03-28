@@ -154,7 +154,7 @@ a {
 
 .home-hero-grid {
   display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
+  grid-template-columns: 1fr 1fr;
   gap: 1rem;
   align-items: center;
 }
@@ -174,13 +174,48 @@ a {
 }
 
 .home-hero-illustration {
-  min-height: 180px;
+  min-height: 240px;
   border: 1px solid #364f86;
   border-radius: var(--radius-md);
   background:
     linear-gradient(180deg, rgba(22, 35, 68, 0.86), rgba(21, 34, 66, 0.86)),
     url('/hero-reading-scene.svg') center/cover no-repeat;
   overflow: hidden;
+}
+
+.home-app-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 0.65rem;
+}
+
+.home-app-pill {
+  border: 1px solid #415a96;
+  background: rgba(34, 49, 89, 0.9);
+  border-radius: 999px;
+  padding: 0.28rem 0.6rem;
+  font-size: 0.78rem;
+  color: #d6e0ff;
+}
+
+.home-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.35rem;
+  text-decoration: none;
+  border-radius: 10px;
+  padding: 0.58rem 1rem;
+  font-weight: 700;
+  color: #e7ebff;
+  border: 1px solid #7589ff;
+  background: linear-gradient(180deg, #6f7fff, #5f71eb);
+  box-shadow: 0 8px 16px rgba(25, 34, 70, 0.35);
+}
+
+.home-cta-btn:hover {
+  filter: brightness(1.04);
 }
 
 /* Home tiles */
@@ -280,6 +315,160 @@ a {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 220px));
   gap: 0.6rem;
+}
+
+.find-genre-add {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.5rem;
+}
+
+.find-add-genre-btn {
+  border-radius: var(--radius-sm);
+  border: 1px solid #6f84cc;
+  background: #2a3e6d;
+  color: #e2e9ff;
+  font: inherit;
+  padding: 0.62rem 0.78rem;
+  cursor: pointer;
+}
+
+.find-add-genre-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.find-genre-pills {
+  margin-top: 0.65rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.find-genre-pill {
+  border: 1px solid #4e69a9;
+  background: #23345f;
+  color: #dde6ff;
+  border-radius: 999px;
+  padding: 0.24rem 0.58rem;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.find-genre-clear {
+  border: 1px solid #4a5f93;
+  background: #1e2d56;
+  color: #cad7ff;
+  border-radius: 999px;
+  padding: 0.24rem 0.58rem;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.home-trending-panel {
+  margin-top: 0.9rem;
+  padding: 0.95rem;
+}
+
+.home-trending-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.home-trending-head h2 {
+  margin: 0;
+  font-family: ui-serif, Georgia, Cambria, Times New Roman, serif;
+  font-size: 1.8rem;
+}
+
+.home-timeframe {
+  display: inline-flex;
+  gap: 0.35rem;
+}
+
+.home-timeframe-btn {
+  border: 1px solid #3d558d;
+  background: #22345f;
+  color: #d0dcff;
+  border-radius: 999px;
+  padding: 0.26rem 0.58rem;
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.home-timeframe-btn--active {
+  border-color: #8699ff;
+  color: #f0f3ff;
+}
+
+.home-trending-grid {
+  margin-top: 0.8rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.65rem;
+}
+
+.home-trend-card {
+  border: 1px solid #354e83;
+  background: #1c2c52;
+  border-radius: 10px;
+  padding: 0.58rem;
+  display: grid;
+  grid-template-columns: auto 56px 1fr;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.home-trend-rank {
+  font-size: 0.74rem;
+  color: #9eb0e3;
+}
+
+.home-trend-cover {
+  width: 56px;
+  aspect-ratio: 2 / 3;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 1px solid #425f95;
+}
+
+.home-trend-cover--placeholder {
+  display: grid;
+  place-items: center;
+  font-size: 0.65rem;
+  color: #9cb0de;
+  background: #24345c;
+}
+
+.home-trend-meta h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+.home-trend-meta p {
+  margin: 0.15rem 0 0;
+  color: #c7d4f6;
+  font-size: 0.84rem;
+}
+
+.home-trend-stats {
+  color: #9bb0e3 !important;
+  font-size: 0.78rem !important;
+}
+
+.home-trending-actions {
+  margin-top: 0.75rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .inline-alert {
@@ -956,6 +1145,10 @@ a {
   }
 
   .find-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .find-genre-add {
     grid-template-columns: 1fr;
   }
 

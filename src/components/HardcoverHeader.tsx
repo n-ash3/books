@@ -8,7 +8,7 @@ export function HardcoverHeader() {
           <span className="brand-dot" aria-hidden="true">
             ■
           </span>
-          <span>Hardcover Clone</span>
+          <span>BookBoard</span>
         </Link>
         <nav className="hardcover-nav">
           <NavLink to="/find" className={({ isActive }) => `nav-chip${isActive ? ' nav-chip--active' : ''}`}>

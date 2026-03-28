@@ -4,7 +4,7 @@ import { HardcoverHeader } from '../components/HardcoverHeader'
 import { SearchBar } from '../components/SearchBar'
 import { SearchState } from '../components/SearchState'
 import { SourceBadge } from '../components/SourceBadge'
-import { fetchBooksByGenre, fetchGenres } from '../lib/genreBrowse'
+import { fetchBooksByGenres, fetchGenres } from '../lib/genreBrowse'
 import type { Book, SearchResult, ShelfStatus } from '../lib/types'
 
 interface FindPageProps {
@@ -36,13 +36,18 @@ export function FindPage({
   onShelfChange,
   onShelfRemove,
 }: FindPageProps) {
-  const [activeGenre, setActiveGenre] = useState('all')
+  const [selectedGenres, setSelectedGenres] = useState<string[]>([])
+  const [genrePicker, setGenrePicker] = useState('')
   const [sortMode, setSortMode] = useState<'popular' | 'topRated' | 'newest'>('popular')
   const [webGenres, setWebGenres] = useState<string[]>([])
   const [webGenreBooks, setWebGenreBooks] = useState<Book[]>([])
-  const [loadedGenre, setLoadedGenre] = useState('')
+  const [loadedGenreKey, setLoadedGenreKey] = useState('')
 
   const hasQuery = query.trim().length > 0
+  const selectedGenreKey = useMemo(
+    () => [...selectedGenres].sort((a, b) => a.localeCompare(b)).join('||'),
+    [selectedGenres],
+  )
 
   useEffect(() => {
     let active = true
@@ -60,34 +65,35 @@ export function FindPage({
   }, [])
 
   useEffect(() => {
-    if (hasQuery || activeGenre === 'all') {
+    if (hasQuery || selectedGenres.length === 0) {
       return
     }
     let active = true
     void (async () => {
-      const result = await fetchBooksByGenre(activeGenre, 60)
+      const result = await fetchBooksByGenres(selectedGenres, 26)
       if (!active) {
         return
       }
       setWebGenreBooks(result)
-      setLoadedGenre(activeGenre)
+      setLoadedGenreKey(selectedGenreKey)
     })()
 
     return () => {
       active = false
     }
-  }, [activeGenre, hasQuery])
+  }, [hasQuery, selectedGenreKey, selectedGenres])
 
-  const genreFeedPending = !hasQuery && activeGenre !== 'all' && loadedGenre !== activeGenre
+  const genreFeedPending =
+    !hasQuery && selectedGenres.length > 0 && loadedGenreKey !== selectedGenreKey
   const candidateBooks = useMemo(() => {
     if (hasQuery) {
       return books
     }
-    if (activeGenre !== 'all') {
+    if (selectedGenres.length > 0) {
       return genreFeedPending ? [] : webGenreBooks
     }
     return allBooks
-  }, [activeGenre, allBooks, books, genreFeedPending, hasQuery, webGenreBooks])
+  }, [allBooks, books, genreFeedPending, hasQuery, selectedGenres.length, webGenreBooks])
 
   const genreOptions = useMemo(() => {
     const unique = Array.from(
@@ -100,12 +106,42 @@ export function FindPage({
     return unique
   }, [allBooks, books, webGenres])
 
+  const availableGenres = useMemo(
+    () => genreOptions.filter((genre) => !selectedGenres.includes(genre)),
+    [genreOptions, selectedGenres],
+  )
+
+  function addGenreFilter(): void {
+    const next = genrePicker.trim()
+    if (!next) {
+      return
+    }
+    setSelectedGenres((previous) => {
+      if (previous.includes(next)) {
+        return previous
+      }
+      return [...previous, next]
+    })
+    setGenrePicker('')
+  }
+
+  function removeGenreFilter(genre: string): void {
+    setSelectedGenres((previous) => previous.filter((item) => item !== genre))
+  }
+
+  function clearGenreFilters(): void {
+    setSelectedGenres([])
+    setGenrePicker('')
+  }
+
   const filteredBooks = useMemo(() => {
     const scoped =
-      activeGenre === 'all' || (!hasQuery && activeGenre !== 'all')
+      selectedGenres.length === 0 || !hasQuery
         ? candidateBooks
         : candidateBooks.filter((book) =>
-            book.genres.some((genre) => genre.toLowerCase() === activeGenre.toLowerCase()),
+            selectedGenres.some((selected) =>
+              book.genres.some((genre) => genre.toLowerCase() === selected.toLowerCase()),
+            ),
           )
 
     const sorted = [...scoped]
@@ -123,7 +159,7 @@ export function FindPage({
       sorted.sort((a, b) => Number(b.releaseDate || 0) - Number(a.releaseDate || 0))
     }
     return sorted
-  }, [activeGenre, candidateBooks, hasQuery, sortMode])
+  }, [candidateBooks, hasQuery, selectedGenres, sortMode])
 
   const effectiveLoading = loading || genreFeedPending
   const showResults = !effectiveLoading && filteredBooks.length > 0
@@ -136,7 +172,8 @@ export function FindPage({
         <section className="browse-panel">
           <h1>Find</h1>
           <p className="browse-subtitle">
-            Search through a large catalog and filter by genre to see what is most popular.
+            Search through a large catalog and filter by one or more genres to see what is most
+            popular.
           </p>
         </section>
 
@@ -149,15 +186,25 @@ export function FindPage({
           />
           <div className="find-filters">
             <label className="shelf-select">
-              Genre
-              <select value={activeGenre} onChange={(event) => setActiveGenre(event.target.value)}>
-                <option value="all">All genres</option>
-                {genreOptions.map((genre) => (
-                  <option key={genre} value={genre}>
-                    {genre}
-                  </option>
-                ))}
-              </select>
+              Add genre filter
+              <div className="find-genre-add">
+                <select value={genrePicker} onChange={(event) => setGenrePicker(event.target.value)}>
+                  <option value="">Choose genre</option>
+                  {availableGenres.map((genre) => (
+                    <option key={genre} value={genre}>
+                      {genre}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  className="find-add-genre-btn"
+                  onClick={addGenreFilter}
+                  disabled={!genrePicker}
+                >
+                  Add
+                </button>
+              </div>
             </label>
 
             <label className="shelf-select">
@@ -172,7 +219,33 @@ export function FindPage({
               </select>
             </label>
           </div>
+
+          {selectedGenres.length > 0 ? (
+            <div className="find-genre-pills" aria-label="Selected genres">
+              {selectedGenres.map((genre) => (
+                <button
+                  type="button"
+                  key={genre}
+                  className="find-genre-pill"
+                  onClick={() => removeGenreFilter(genre)}
+                >
+                  {genre} ×
+                </button>
+              ))}
+              <button type="button" className="find-genre-clear" onClick={clearGenreFilters}>
+                Clear all
+              </button>
+            </div>
+          ) : (
+            <p className="source-note">No genre filter selected. Showing all available genres.</p>
+          )}
+
           <SourceBadge source={source} />
+          {!hasQuery && selectedGenres.length > 0 ? (
+            <p className="source-note">
+              Building a live genre feed from the web for: <strong>{selectedGenres.join(', ')}</strong>
+            </p>
+          ) : null}
           {popularMode ? (
             <p className="source-note">
               Showing <strong>most popular</strong> titles (ranked by rating count, then rating).
@@ -188,7 +261,7 @@ export function FindPage({
           </div>
           <SearchState
             loading={effectiveLoading}
-            hasQuery={hasQuery || hasSearched}
+            hasQuery={hasQuery || hasSearched || selectedGenres.length > 0}
             hasResults={filteredBooks.length > 0}
           />
           {showResults ? (
