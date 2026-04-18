@@ -44,3 +44,16 @@ export interface RetailerLink {
   name: string
   url: string
 }
+
+export interface TVShow {
+  id: string
+  title: string
+  synopsis: string
+  basedOnBook: string
+  bookAuthor: string
+  years: string
+  seasons: string
+  network: string
+  genres: string[]
+  infoUrl: string
+}

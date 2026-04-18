@@ -14,6 +14,12 @@ export function HardcoverHeader() {
           <NavLink to="/find" className={({ isActive }) => `nav-chip${isActive ? ' nav-chip--active' : ''}`}>
             Find
           </NavLink>
+          <NavLink
+            to="/recommendations"
+            className={({ isActive }) => `nav-chip${isActive ? ' nav-chip--active' : ''}`}
+          >
+            AI Recs
+          </NavLink>
           <NavLink to="/track" className={({ isActive }) => `nav-chip${isActive ? ' nav-chip--active' : ''}`}>
             Track
           </NavLink>
@@ -28,6 +34,12 @@ export function HardcoverHeader() {
             className={({ isActive }) => `nav-chip${isActive ? ' nav-chip--active' : ''}`}
           >
             Browse
+          </NavLink>
+          <NavLink
+            to="/tv-shows"
+            className={({ isActive }) => `nav-chip${isActive ? ' nav-chip--active' : ''}`}
+          >
+            TV from Books
           </NavLink>
           <a href="https://docs.hardcover.app/" target="_blank" rel="noreferrer" className="nav-chip">
             API Docs

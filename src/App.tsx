@@ -14,6 +14,8 @@ import { BrowsePage } from './pages/BrowsePage'
 import { GenresPage } from './pages/GenresPage'
 import { GenreBooksPage } from './pages/GenreBooksPage'
 import { MultiGenreBooksPage } from './pages/MultiGenreBooksPage'
+import { RecommendationsPage } from './pages/RecommendationsPage'
+import { TVShowsPage } from './pages/TVShowsPage'
 
 function App() {
   const initialCache = useMemo(() => loadBookCache(), [])
@@ -120,7 +122,21 @@ function App() {
           />
         }
       />
+      <Route
+        path="/recommendations"
+        element={
+          <RecommendationsPage
+            books={bookCache}
+            shelves={shelves}
+            onShelfChange={(book, status) => {
+              void updateShelf(book, status)
+            }}
+            onShelfRemove={removeShelf}
+          />
+        }
+      />
       <Route path="/browse" element={<BrowsePage />} />
+      <Route path="/tv-shows" element={<TVShowsPage />} />
       <Route
         path="/book/:id"
         element={
