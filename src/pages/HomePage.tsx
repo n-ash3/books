@@ -40,6 +40,13 @@ export function HomePage() {
             </article>
           </Link>
 
+          <Link className="browse-tile-link" to="/recommendations">
+            <article>
+              <h2>AI Recommendations</h2>
+              <p>Enter your favorite book and get similar books ranked by our recommendation model.</p>
+            </article>
+          </Link>
+
           <Link className="browse-tile-link" to="/track">
             <article>
               <h2>Track</h2>
@@ -47,10 +54,10 @@ export function HomePage() {
             </article>
           </Link>
 
-          <Link className="browse-tile-link" to="/discover">
+          <Link className="browse-tile-link" to="/tv-shows">
             <article>
-              <h2>Connect</h2>
-              <p>Explore reader activity and discover new directions for your next read.</p>
+              <h2>TV from Books</h2>
+              <p>Browse TV series adapted from books and view source-title information.</p>
             </article>
           </Link>
 

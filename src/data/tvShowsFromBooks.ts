@@ -1,0 +1,108 @@
+import type { TVShow } from '../lib/types'
+
+export const TV_SHOWS_FROM_BOOKS: TVShow[] = [
+  {
+    id: 'tv-game-of-thrones',
+    title: 'Game of Thrones',
+    synopsis:
+      'Noble families compete for control of the Iron Throne while an ancient threat rises in the North.',
+    basedOnBook: 'A Song of Ice and Fire',
+    bookAuthor: 'George R.R. Martin',
+    years: '2011–2019',
+    seasons: '8 seasons',
+    network: 'HBO',
+    genres: ['Fantasy', 'Drama'],
+    infoUrl: 'https://www.hbo.com/game-of-thrones',
+  },
+  {
+    id: 'tv-the-handmaids-tale',
+    title: "The Handmaid's Tale",
+    synopsis:
+      'In a totalitarian society, women are stripped of rights and forced into rigid social roles.',
+    basedOnBook: "The Handmaid's Tale",
+    bookAuthor: 'Margaret Atwood',
+    years: '2017–present',
+    seasons: '6 seasons',
+    network: 'Hulu',
+    genres: ['Dystopian', 'Drama'],
+    infoUrl: 'https://www.hulu.com/series/the-handmaids-tale',
+  },
+  {
+    id: 'tv-big-little-lies',
+    title: 'Big Little Lies',
+    synopsis:
+      'A group of mothers in Monterey become tied together by secrets, lies, and a suspicious death.',
+    basedOnBook: 'Big Little Lies',
+    bookAuthor: 'Liane Moriarty',
+    years: '2017–2019',
+    seasons: '2 seasons',
+    network: 'HBO',
+    genres: ['Mystery', 'Drama'],
+    infoUrl: 'https://www.hbo.com/big-little-lies',
+  },
+  {
+    id: 'tv-silo',
+    title: 'Silo',
+    synopsis:
+      'In a giant underground silo, a community follows strict rules while uncovering hidden truths.',
+    basedOnBook: 'Wool (Silo Series)',
+    bookAuthor: 'Hugh Howey',
+    years: '2023–present',
+    seasons: '2 seasons',
+    network: 'Apple TV+',
+    genres: ['Science Fiction', 'Mystery'],
+    infoUrl: 'https://tv.apple.com/us/show/silo/umc.cmc.3yksgc857px0k0rqe5zd4jice',
+  },
+  {
+    id: 'tv-shadow-and-bone',
+    title: 'Shadow and Bone',
+    synopsis:
+      'A young soldier discovers extraordinary powers and is drawn into a battle between light and darkness.',
+    basedOnBook: 'Shadow and Bone / Six of Crows',
+    bookAuthor: 'Leigh Bardugo',
+    years: '2021–2023',
+    seasons: '2 seasons',
+    network: 'Netflix',
+    genres: ['Fantasy', 'Adventure'],
+    infoUrl: 'https://www.netflix.com/title/80236319',
+  },
+  {
+    id: 'tv-normal-people',
+    title: 'Normal People',
+    synopsis:
+      'Two Irish students navigate class, intimacy, and identity over years of changing relationships.',
+    basedOnBook: 'Normal People',
+    bookAuthor: 'Sally Rooney',
+    years: '2020',
+    seasons: '1 season',
+    network: 'Hulu / BBC',
+    genres: ['Romance', 'Drama'],
+    infoUrl: 'https://www.hulu.com/series/normal-people',
+  },
+  {
+    id: 'tv-you',
+    title: 'You',
+    synopsis:
+      'A charming bookstore manager becomes dangerously obsessed with women he claims to love.',
+    basedOnBook: 'You',
+    bookAuthor: 'Caroline Kepnes',
+    years: '2018–present',
+    seasons: '5 seasons',
+    network: 'Netflix',
+    genres: ['Thriller', 'Drama'],
+    infoUrl: 'https://www.netflix.com/title/80211991',
+  },
+  {
+    id: 'tv-the-queens-gambit',
+    title: "The Queen's Gambit",
+    synopsis:
+      'An orphaned chess prodigy rises through elite competition while facing addiction and isolation.',
+    basedOnBook: "The Queen's Gambit",
+    bookAuthor: 'Walter Tevis',
+    years: '2020',
+    seasons: '1 season',
+    network: 'Netflix',
+    genres: ['Drama'],
+    infoUrl: 'https://www.netflix.com/title/80234304',
+  },
+]
